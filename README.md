@@ -1,2 +1,4 @@
 # php-bunny
-Queue Interop Bunny
+
+PoC: Non-Blocking Queue Interop implementation of Bunny
+
