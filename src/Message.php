@@ -7,7 +7,7 @@ namespace BBQueue\Bunny;
 use Interop\Queue\Impl\MessageTrait;
 use Interop\Queue\Message as MessageContract;
 
-final readonly class Message implements MessageContract
+final class Message implements MessageContract
 {
     use MessageTrait;
 
