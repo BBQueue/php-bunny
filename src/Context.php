@@ -75,7 +75,7 @@ final readonly class Context implements ContextContract
 
     public function close(): void
     {
-        // TODO: Implement close() method.
+        $this->client->disconnect();
     }
 
     private function openChannel(): ChannelInterface
