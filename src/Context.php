@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace BBQueue\Bunny;
 
+use Bunny\ChannelInterface;
 use Bunny\Client;
 use Interop\Queue\Consumer as ConsumerContract;
 use Interop\Queue\Context as ContextContract;
@@ -19,7 +20,7 @@ use function random_bytes;
 
 final readonly class Context implements ContextContract
 {
-    public function __construct(private Client $client)
+    public function __construct(private Client $client, private int $prefetchCount = 0)
     {
     }
 
@@ -54,12 +55,12 @@ final readonly class Context implements ContextContract
 
     public function createProducer(): ProducerContract
     {
-        return new Producer($this->client->channel());
+        return new Producer($this->openChannel());
     }
 
     public function createConsumer(Destination $destination): ConsumerContract
     {
-        return new Consumer($destination, $this->client->channel());
+        return new Consumer($destination, $this->openChannel());
     }
 
     public function createSubscriptionConsumer(): SubscriptionConsumerContract
@@ -75,5 +76,13 @@ final readonly class Context implements ContextContract
     public function close(): void
     {
         // TODO: Implement close() method.
+    }
+
+    private function openChannel(): ChannelInterface
+    {
+        $channel = $this->client->channel();
+        $channel->qos(0, $this->prefetchCount);
+
+        return $channel;
     }
 }

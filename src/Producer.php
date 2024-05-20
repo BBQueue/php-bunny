@@ -8,6 +8,8 @@ use Bunny\ChannelInterface;
 use Interop\Queue\Destination;
 use Interop\Queue\Message as MessageContract;
 use Interop\Queue\Producer as ProducerContract;
+use React\EventLoop\Loop;
+use function React\Async\async;
 
 final class Producer implements ProducerContract
 {

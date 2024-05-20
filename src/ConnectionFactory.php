@@ -10,12 +10,12 @@ use Interop\Queue\Context as ContextContract;
 
 final readonly class ConnectionFactory implements ConnectionFactoryContract
 {
-    public function __construct(private Client $client)
+    public function __construct(private Client $client, private int $prefetchCount = 0)
     {
     }
 
     public function createContext(): ContextContract
     {
-        return new Context($this->client);
+        return new Context($this->client, $this->prefetchCount);
     }
 }
