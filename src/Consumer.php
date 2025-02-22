@@ -50,7 +50,7 @@ final class Consumer implements ConsumerContract
 
     public function __destruct()
     {
-        $this->channel->cancel($this->consumerTag);
+//        $this->channel->cancel($this->consumerTag);
     }
 
     public function getQueue(): QueueContract
