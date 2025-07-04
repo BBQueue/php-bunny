@@ -1,14 +1,18 @@
 {
   "name": "bbqueue/bunny",
-  "description": "\ud83d\udc07 Bunny Queue Interop",
+  "description": "\ud83d\udc07 Non-Blocking Bunny Queue Interop",
   "license": "MIT",
   "require": {
     "php": "^8.3",
+    "ext-random": "^8.3",
     "bunny/bunny": "^0.6@dev",
-    "queue-interop/queue-interop": "^0.8"
+    "queue-interop/queue-interop": "^0.8.2",
+    "react/async": "^4.3",
+    "react/promise": "^3.2"
   },
   "require-dev": {
-    "wyrihaximus/async-test-utilities": "^8.0.1"
+    "wyrihaximus/async-test-utilities": "^9.4.1",
+    "wyrihaximus/makefiles": "^0.4.3"
   },
   "autoload": {
     "psr-4": {
@@ -29,7 +33,9 @@
       "icanhazstring/composer-unused": true,
       "infection/extension-installer": true,
       "mindplay/composer-locator": true,
-      "wyrihaximus/broadcast": true
+      "phpstan/extension-installer": true,
+      "wyrihaximus/broadcast": true,
+      "wyrihaximus/makefiles": true
     },
     "platform": {
       "php": "8.3.13"

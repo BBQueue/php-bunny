@@ -8,8 +8,6 @@ use Bunny\ChannelInterface;
 use Interop\Queue\Destination;
 use Interop\Queue\Message as MessageContract;
 use Interop\Queue\Producer as ProducerContract;
-use React\EventLoop\Loop;
-use function React\Async\async;
 
 final class Producer implements ProducerContract
 {
@@ -17,13 +15,18 @@ final class Producer implements ProducerContract
     private int|null $priority      = null;
     private int|null $timeToLive    = null;
 
-    public function __construct(private ChannelInterface $channel)
+    public function __construct(private readonly ChannelInterface $channel)
     {
     }
 
     public function send(Destination $destination, MessageContract $message): void
     {
-        $this->channel->publish($message->getBody(), $message->getHeaders(), '', $destination->getQueueName());
+        $this->channel->publish(
+            $message->getBody(),
+            $message->getHeaders(), /** @phpstan-ignore argument.type */
+            '',
+            $destination instanceof Queue ? $destination->getQueueName() : '',
+        );
     }
 
     public function setDeliveryDelay(int|null $deliveryDelay = null): ProducerContract

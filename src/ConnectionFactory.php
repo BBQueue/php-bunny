@@ -4,13 +4,16 @@ declare(strict_types=1);
 
 namespace BBQueue\Bunny;
 
-use Bunny\Client;
+use Bunny\ClientInterface;
 use Interop\Queue\ConnectionFactory as ConnectionFactoryContract;
 use Interop\Queue\Context as ContextContract;
 
 final readonly class ConnectionFactory implements ConnectionFactoryContract
 {
-    public function __construct(private Client $client, private int $prefetchCount = 0)
+    private const int DEFAULT_PREFETCH_COUNT = 0;
+
+    /** @phpstan-ignore ergebnis.noConstructorParameterWithDefaultValue,shipmonk.deadMethod */
+    public function __construct(private ClientInterface $client, private int $prefetchCount = self::DEFAULT_PREFETCH_COUNT)
     {
     }
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace BBQueue\Bunny;
 
 use Bunny\ChannelInterface;
-use Bunny\Client;
+use Bunny\ClientInterface;
 use Interop\Queue\Consumer as ConsumerContract;
 use Interop\Queue\Context as ContextContract;
 use Interop\Queue\Destination;
@@ -15,18 +15,24 @@ use Interop\Queue\Queue as QueueContract;
 use Interop\Queue\SubscriptionConsumer as SubscriptionConsumerContract;
 use Interop\Queue\Topic as TopicContract;
 
+use function assert;
 use function bin2hex;
 use function random_bytes;
 
 final readonly class Context implements ContextContract
 {
-    public function __construct(private Client $client, private int $prefetchCount = 0)
+    private const int PREFETCH_SIZE               = 0;
+    private const int RANDOM_QUEUE_NAME_BYTE_SIZE = 13;
+
+    public function __construct(private ClientInterface $client, private int $prefetchCount)
     {
     }
 
     /**
      * @param array<string, mixed> $properties
      * @param array<string, mixed> $headers
+     *
+     * @phpstan-ignore method.childParameterType,method.childParameterType
      */
     public function createMessage(string $body = '', array $properties = [], array $headers = []): MessageContract
     {
@@ -50,7 +56,7 @@ final readonly class Context implements ContextContract
 
     public function createTemporaryQueue(): QueueContract
     {
-        return new Queue(bin2hex(random_bytes(13)));
+        return new Queue(bin2hex(random_bytes(self::RANDOM_QUEUE_NAME_BYTE_SIZE)));
     }
 
     public function createProducer(): ProducerContract
@@ -60,6 +66,8 @@ final readonly class Context implements ContextContract
 
     public function createConsumer(Destination $destination): ConsumerContract
     {
+        assert($destination instanceof Queue);
+
         return new Consumer($destination, $this->openChannel());
     }
 
@@ -75,15 +83,17 @@ final readonly class Context implements ContextContract
 
     public function close(): void
     {
-        if ($this->client->isConnected()) {
-            $this->client->disconnect();
+        if (! $this->client->isConnected()) {
+            return;
         }
+
+        $this->client->disconnect();
     }
 
     private function openChannel(): ChannelInterface
     {
         $channel = $this->client->channel();
-        $channel->qos(0, $this->prefetchCount);
+        $channel->qos(self::PREFETCH_SIZE, $this->prefetchCount);
 
         return $channel;
     }
