@@ -3,7 +3,7 @@
   "description": "\ud83d\udc07 Bunny Queue Interop",
   "license": "MIT",
   "require": {
-    "php": "^8.2",
+    "php": "^8.3",
     "bunny/bunny": "^0.6@dev",
     "queue-interop/queue-interop": "^0.8"
   },
@@ -32,7 +32,7 @@
       "wyrihaximus/broadcast": true
     },
     "platform": {
-      "php": "8.2.13"
+      "php": "8.3.13"
     },
     "sort-packages": true
   },
