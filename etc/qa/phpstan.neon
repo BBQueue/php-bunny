@@ -1,11 +1,12 @@
 parameters:
 	ignoreErrors:
-		- '#Method Mammatus\\Queue\\App::__construct\(\) has a parameter \$container with a type declaration of Psr\\Container\\ContainerInterface, but containers should not be injected.#'
-		- '#Method Mammatus\\Queue\\Manager::__construct\(\) has a parameter \$container with a type declaration of Psr\\Container\\ContainerInterface, but containers should not be injected.#'
-	ergebnis:
-		noExtends:
-			classesAllowedToBeExtended:
-				- Mammatus\Queue\Generated\AbstractList_
-
-includes:
-	- ../../vendor/wyrihaximus/async-test-utilities/rules.neon
+		-
+			identifier: ergebnis.noParameterWithNullDefaultValue
+			path: ../../src/Producer.php
+			count: 3
+		-
+			identifier: ergebnis.noParameterWithNullableTypeDeclaration
+			path: ../../src/Producer.php
+		-
+			identifier: argument.type
+			path: ../../src/Message.php

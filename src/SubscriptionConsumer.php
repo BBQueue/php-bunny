@@ -9,7 +9,9 @@ use Interop\Queue\SubscriptionConsumer as SubscriptionConsumerContract;
 
 final readonly class SubscriptionConsumer implements SubscriptionConsumerContract
 {
-    public function consume(int $timeout = 0): void
+    private const int DEFAULT_TIMEOUT = 0;
+
+    public function consume(int $timeout = self::DEFAULT_TIMEOUT): void
     {
         // TODO: Implement consume() method.
     }

@@ -7,38 +7,35 @@ namespace BBQueue\Bunny;
 use Bunny\ChannelInterface;
 use Bunny\Message as BunnyMessage;
 use Interop\Queue\Consumer as ConsumerContract;
-use Interop\Queue\Destination;
 use Interop\Queue\Message as MessageContract;
 use Interop\Queue\Queue as QueueContract;
-use React\EventLoop\Loop;
 use React\Promise\Deferred;
+use SplQueue;
 
-use function React\Async\async;
 use function React\Async\await;
 
-final class Consumer implements ConsumerContract
+final readonly class Consumer implements ConsumerContract
 {
+    private const int DEFAULT_TIMEOUT = 0;
     private string $consumerTag;
 
-    /**
-     * @var \SplQueue<MessageContract>
-     */
-    private \SplQueue $cacheMessages;
+    /** @var SplQueue<MessageContract> */
+    private SplQueue $cacheMessages;
 
-    /**
-     * @var \SplQueue<Deferred>
-     */
-    private \SplQueue $waitingReceives;
+    /** @var SplQueue<Deferred<MessageContract>> */
+    private SplQueue $waitingReceives;
 
-    public function __construct(private readonly Destination $destination, private readonly ChannelInterface $channel)
+    public function __construct(private Queue $destination, private ChannelInterface $channel)
     {
-        $this->cacheMessages = new \SplQueue();
-        $this->waitingReceives = new \SplQueue();
-        $this->consumerTag = $this->channel->consume(
-            function (BunnyMessage $message): void {
-                $message = Message::fromBunnyMessage($message);
+        $this->cacheMessages   = new SplQueue();
+        $this->waitingReceives = new SplQueue();
+        $this->consumerTag     = $this->channel->consume(
+            function (BunnyMessage $bunnyMessage): void {
+                $message = Message::fromBunnyMessage($bunnyMessage);
+                unset($bunnyMessage);
                 if ($this->waitingReceives->isEmpty()) {
                     $this->cacheMessages->enqueue($message);
+
                     return;
                 }
 
@@ -58,9 +55,11 @@ final class Consumer implements ConsumerContract
         return $this->destination;
     }
 
-    public function receive(int $timeout = 0): MessageContract|null
+    /** @phpstan-ignore shipmonk.uselessNullableReturn,return.unusedType */
+    public function receive(int $timeout = self::DEFAULT_TIMEOUT): MessageContract|null
     {
         if ($this->cacheMessages->isEmpty()) {
+            /** @var Deferred<MessageContract> $deferred */
             $deferred = new Deferred();
             $this->waitingReceives->enqueue($deferred);
 
@@ -78,30 +77,14 @@ final class Consumer implements ConsumerContract
     public function acknowledge(MessageContract $message): void
     {
         $this->channel->ack(
-            new BunnyMessage(
-                consumerTag: $message->getProperty('consumerTag'),
-                deliveryTag: $message->getProperty('deliveryTag'),
-                redelivered: $message->getProperty('redelivered'),
-                exchange: $message->getProperty('exchange'),
-                routingKey: $this->destination->getQueueName(),
-                headers: $message->getHeaders(),
-                content: $message->getBody(),
-            ),
+            Message::toBunnyMessage($this->destination, $message),
         );
     }
 
     public function reject(MessageContract $message, bool $requeue = false): void
     {
         $this->channel->nack(
-            new BunnyMessage(
-                consumerTag: $message->getProperty('consumerTag'),
-                deliveryTag: $message->getProperty('deliveryTag'),
-                redelivered: $message->getProperty('redelivered'),
-                exchange: $message->getProperty('exchange'),
-                routingKey: $this->destination->getQueueName(),
-                headers: $message->getHeaders(),
-                content: $message->getBody(),
-            ),
+            Message::toBunnyMessage($this->destination, $message),
             false,
             $requeue,
         );
