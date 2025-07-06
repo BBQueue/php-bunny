@@ -20,7 +20,12 @@
         "FunctionCall": false,
         "IfNegation": false,
         "InstanceOf_": false,
-        "MethodCallRemoval": false
+        "LogicalAnd": false,
+        "LogicalAndAllSubExprNegation": false,
+        "LogicalAndSingleSubExprNegation": false,
+        "LogicalAndNegation": false,
+        "MethodCallRemoval": false,
+        "Ternary": false
     },
     "phpUnit": {
         "configDir": "./etc/qa/"
