@@ -7,11 +7,14 @@ namespace BBQueue\Bunny;
 use Bunny\ChannelInterface;
 use Bunny\Message as BunnyMessage;
 use Interop\Queue\Consumer as ConsumerContract;
+use Interop\Queue\Destination;
 use Interop\Queue\Message as MessageContract;
 use Interop\Queue\Queue as QueueContract;
 use React\Promise\Deferred;
 use SplQueue;
 
+use function is_string;
+use function method_exists;
 use function React\Async\await;
 
 final readonly class Consumer implements ConsumerContract
@@ -25,7 +28,7 @@ final readonly class Consumer implements ConsumerContract
     /** @var SplQueue<Deferred<MessageContract>> */
     private SplQueue $waitingReceives;
 
-    public function __construct(private Queue $destination, private ChannelInterface $channel)
+    public function __construct(private Destination $destination, private ChannelInterface $channel)
     {
         $this->cacheMessages   = new SplQueue();
         $this->waitingReceives = new SplQueue();
@@ -41,7 +44,7 @@ final readonly class Consumer implements ConsumerContract
 
                 $this->waitingReceives->dequeue()->resolve($message);
             },
-            $this->destination->getQueueName(),
+            ($this->destination instanceof Queue ? $this->destination->getQueueName() : (method_exists($this->destination, 'getQueueName') && is_string($this->destination->getQueueName()) ? $this->destination->getQueueName() : '')),
         )->consumerTag;
     }
 
@@ -52,6 +55,7 @@ final readonly class Consumer implements ConsumerContract
 
     public function getQueue(): QueueContract
     {
+        /** @phpstan-ignore return.type */
         return $this->destination;
     }
 

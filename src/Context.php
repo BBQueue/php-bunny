@@ -15,7 +15,6 @@ use Interop\Queue\Queue as QueueContract;
 use Interop\Queue\SubscriptionConsumer as SubscriptionConsumerContract;
 use Interop\Queue\Topic as TopicContract;
 
-use function assert;
 use function bin2hex;
 use function random_bytes;
 
@@ -66,8 +65,6 @@ final readonly class Context implements ContextContract
 
     public function createConsumer(Destination $destination): ConsumerContract
     {
-        assert($destination instanceof Queue);
-
         return new Consumer($destination, $this->openChannel());
     }
 

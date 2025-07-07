@@ -9,6 +9,9 @@ use Interop\Queue\Destination;
 use Interop\Queue\Message as MessageContract;
 use Interop\Queue\Producer as ProducerContract;
 
+use function is_string;
+use function method_exists;
+
 final class Producer implements ProducerContract
 {
     private int|null $deliveryDelay = null;
@@ -25,7 +28,7 @@ final class Producer implements ProducerContract
             $message->getBody(),
             $message->getHeaders(), /** @phpstan-ignore argument.type */
             '',
-            $destination instanceof Queue ? $destination->getQueueName() : '',
+            ($destination instanceof Queue ? $destination->getQueueName() : (method_exists($destination, 'getQueueName') && is_string($destination->getQueueName()) ? $destination->getQueueName() : '')),
         );
     }
 

@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace BBQueue\Bunny;
 
 use Bunny\Message as BunnyMessage;
+use Interop\Queue\Destination;
 use Interop\Queue\Impl\MessageTrait;
 use Interop\Queue\Message as MessageContract;
+
+use function method_exists;
 
 final class Message implements MessageContract
 {
@@ -25,14 +28,14 @@ final class Message implements MessageContract
         return $message;
     }
 
-    public static function toBunnyMessage(Queue $queue, MessageContract $message): BunnyMessage
+    public static function toBunnyMessage(Destination $destination, MessageContract $message): BunnyMessage
     {
         return new BunnyMessage(
             consumerTag: $message->getProperty('consumerTag'),
             deliveryTag: $message->getProperty('deliveryTag'),
             redelivered: $message->getProperty('redelivered'),
             exchange: $message->getProperty('exchange'),
-            routingKey: $queue->getQueueName(),
+            routingKey: method_exists($destination, 'getQueueName') ? $destination->getQueueName() : '',
             headers: $message->getHeaders(),
             content: $message->getBody(),
         );
